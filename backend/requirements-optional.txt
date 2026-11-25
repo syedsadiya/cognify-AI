@@ -1,0 +1,3 @@
+# FireDucks is optional (Linux / supported platforms only).
+# The app runs fine without it.
+fireducks
