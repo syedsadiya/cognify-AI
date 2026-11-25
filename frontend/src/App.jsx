@@ -1,39 +1,35 @@
-import { useEffect, useState } from "react";
-import { getHealth } from "./services/api";
+import { Routes, Route, Navigate } from "react-router-dom";
+import Layout from "./components/Layout";
+import Landing from "./pages/Landing";
+import Dashboard from "./pages/Dashboard";
+import DatasetUpload from "./pages/DatasetUpload";
+import DatasetExplorer from "./pages/DatasetExplorer";
+import AIAssistant from "./pages/AIAssistant";
+import ProcessingWorkspace from "./pages/ProcessingWorkspace";
+import BenchmarkComparison from "./pages/BenchmarkComparison";
+import EngineRecommendation from "./pages/EngineRecommendation";
+import BenchmarkHistory from "./pages/BenchmarkHistory";
+import Reports from "./pages/Reports";
+import Settings from "./pages/Settings";
 
 export default function App() {
-  const [health, setHealth] = useState(null);
-  const [error, setError] = useState("");
-
-  useEffect(() => {
-    getHealth().then(setHealth).catch((e) => setError(e.message));
-  }, []);
-
   return (
-    <main className="min-h-screen flex items-center justify-center p-6">
-      <div className="bg-sand rounded-2xl shadow-card p-8 w-full max-w-xl">
-        <h1 className="text-3xl font-bold">CremaBench</h1>
-        <p className="text-taupe mt-1">Intelligent Data. Smarter Performance.</p>
-
-        <h2 className="mt-6 font-semibold">Backend status</h2>
-        {error && <p className="text-coffee mt-2">{error}</p>}
-        {!health && !error && <p className="text-taupe mt-2">Checking...</p>}
-        {health && (
-          <ul className="mt-3 space-y-2">
-            {health.engines.map((e) => (
-              <li key={e.name} className="flex justify-between bg-offwhite rounded-lg px-4 py-2">
-                <span className="capitalize">{e.name}</span>
-                <span className={e.available ? "text-coffee font-medium" : "text-taupe"}>
-                  {e.available ? `v${e.version}` : "not installed"}
-                </span>
-              </li>
-            ))}
-          </ul>
-        )}
-        <button className="mt-6 bg-coffee text-offwhite rounded-lg px-5 py-2">
-          Get Started
-        </button>
-      </div>
-    </main>
+    <Routes>
+      <Route path="/" element={<Landing />} />
+      <Route path="/app" element={<Layout />}>
+        <Route index element={<Navigate to="dashboard" replace />} />
+        <Route path="dashboard" element={<Dashboard />} />
+        <Route path="upload" element={<DatasetUpload />} />
+        <Route path="explorer" element={<DatasetExplorer />} />
+        <Route path="assistant" element={<AIAssistant />} />
+        <Route path="workspace" element={<ProcessingWorkspace />} />
+        <Route path="benchmark" element={<BenchmarkComparison />} />
+        <Route path="recommendation" element={<EngineRecommendation />} />
+        <Route path="history" element={<BenchmarkHistory />} />
+        <Route path="reports" element={<Reports />} />
+        <Route path="settings" element={<Settings />} />
+      </Route>
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
   );
 }

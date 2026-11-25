@@ -7,3 +7,5 @@ backend/storage/uploads/*
 backend/storage/exports/*
 backend/storage/*.db
 !backend/storage/**/.gitkeep
+sample_data/sales_medium.csv
+sample_data/sales_large.csv

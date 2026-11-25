@@ -28,3 +28,15 @@ Open http://localhost:5173
 ```
 pytest
 ```
+
+## Phase 2 additions
+- Database: SQLite via SQLAlchemy (tables are created automatically on startup).
+- API: `/api/dashboard/summary`, `/api/datasets`, `/api/benchmarks/history`, `/api/settings`.
+- Frontend: sidebar layout, routing for all 11 pages, working Dashboard and Settings.
+
+## Phase 3 additions
+- Upload CSV / XLSX / Parquet (size and type validation, safe server-side filenames).
+- Preview, profiling (types, missing values, duplicates, statistics), download, delete.
+- API: `POST /api/datasets/upload`, `GET /api/datasets/{id}/preview`, `/profile`, `/download`, `DELETE /api/datasets/{id}`.
+- Sample data in `sample_data/`. Create larger files (100k and 1M rows) from `backend`:
+  `python scripts/generate_sample_data.py --all`
