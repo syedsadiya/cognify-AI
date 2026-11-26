@@ -15,6 +15,7 @@ pip install -r requirements-optional.txt   # optional, FireDucks (may fail on Wi
 copy ..\.env.example .env       # Mac/Linux: cp ../.env.example .env
 uvicorn app.main:app --reload --port 8000
 ```
+Set `OPENAI_API_KEY` in `backend/.env` to enable AI chat. Keep the key private and do not commit it.
 Open http://localhost:8000/api/health
 
 ### Frontend (run inside `cremabench/frontend`)
@@ -40,3 +41,8 @@ pytest
 - API: `POST /api/datasets/upload`, `GET /api/datasets/{id}/preview`, `/profile`, `/download`, `DELETE /api/datasets/{id}`.
 - Sample data in `sample_data/`. Create larger files (100k and 1M rows) from `backend`:
   `python scripts/generate_sample_data.py --all`
+
+## AI assistant
+- Open **AI Data Assistant** in the app to chat with the configured OpenAI model.
+- Optional dataset context includes its profile and numeric statistics; this profile is sent to OpenAI with the chat request.
+- Chat API: `POST /api/assistant/chat`. Configure `OPENAI_API_KEY` in `backend/.env` and restart the backend before chatting.

@@ -24,6 +24,14 @@ export function getSettings() {
   return request("/settings");
 }
 
+export function sendAssistantChat(message, history, datasetId) {
+  return request("/assistant/chat", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ message, history, dataset_id: datasetId || null }),
+  });
+}
+
 export function saveSetting(key, value) {
   return request("/settings", {
     method: "PUT",
