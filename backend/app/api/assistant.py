@@ -32,10 +32,16 @@ def dataset_context(db: Session, dataset_id: int) -> str:
 
 @router.post("/assistant/chat", response_model=ChatResponse)
 def chat(request: ChatRequest, db: Session = Depends(get_db)):
-    if not settings.openai_api_key:
+    if settings.xai_api_key:
+        client = OpenAI(api_key=settings.xai_api_key, base_url=settings.xai_base_url)
+        model = settings.xai_model
+    elif settings.openai_api_key:
+        client = OpenAI(api_key=settings.openai_api_key)
+        model = settings.openai_model
+    else:
         raise HTTPException(
             status_code=503,
-            detail="AI chat is not configured. Add OPENAI_API_KEY to backend/.env and restart the backend.",
+            detail="AI chat is not configured. Add XAI_API_KEY (Grok) or OPENAI_API_KEY to backend/.env and restart the backend.",
         )
 
     system_prompt = (
@@ -51,8 +57,8 @@ def chat(request: ChatRequest, db: Session = Depends(get_db)):
     messages.append({"role": "user", "content": request.message})
 
     try:
-        response = OpenAI(api_key=settings.openai_api_key).chat.completions.create(
-            model=settings.openai_model,
+        response = client.chat.completions.create(
+            model=model,
             messages=messages,
         )
     except OpenAIError as error:

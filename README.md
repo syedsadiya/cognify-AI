@@ -15,7 +15,7 @@ pip install -r requirements-optional.txt   # optional, FireDucks (may fail on Wi
 copy ..\.env.example .env       # Mac/Linux: cp ../.env.example .env
 uvicorn app.main:app --reload --port 8000
 ```
-Set `OPENAI_API_KEY` in `backend/.env` to enable AI chat. Keep the key private and do not commit it.
+Set `XAI_API_KEY` in `backend/.env` to enable Grok chat. Keep the key private and do not commit it.
 Open http://localhost:8000/api/health
 
 ### Frontend (run inside `cremabench/frontend`)
@@ -43,6 +43,7 @@ pytest
   `python scripts/generate_sample_data.py --all`
 
 ## AI assistant
-- Open **AI Data Assistant** in the app to chat with the configured OpenAI model.
-- Optional dataset context includes its profile and numeric statistics; this profile is sent to OpenAI with the chat request.
-- Chat API: `POST /api/assistant/chat`. Configure `OPENAI_API_KEY` in `backend/.env` and restart the backend before chatting.
+- Open **AI Data Assistant** in the app to chat with Grok (`grok-4.7` by default).
+- Set `XAI_API_KEY` in `backend/.env` and restart the backend. `XAI_MODEL` can override the model. OpenAI is also supported through `OPENAI_API_KEY` and `OPENAI_MODEL`; XAI settings take precedence if both keys are present.
+- Optional dataset context includes its profile and numeric statistics; this profile is sent to the configured AI provider with the chat request.
+- Chat API: `POST /api/assistant/chat`.

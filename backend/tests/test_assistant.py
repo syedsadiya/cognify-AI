@@ -2,35 +2,65 @@ from types import SimpleNamespace
 from app.api import assistant
 
 
-def test_chat_requires_openai_key(client, monkeypatch):
+def test_chat_requires_provider_key(client, monkeypatch):
     monkeypatch.setattr(assistant.settings, "openai_api_key", "")
+    monkeypatch.setattr(assistant.settings, "xai_api_key", "")
 
     response = client.post("/api/assistant/chat", json={"message": "Hello"})
 
     assert response.status_code == 503
-    assert "OPENAI_API_KEY" in response.json()["detail"]
+    assert "XAI_API_KEY" in response.json()["detail"]
 
 
-def test_chat_returns_ai_answer(client, monkeypatch):
+def test_chat_uses_grok_and_returns_answer(client, monkeypatch):
     class FakeCompletions:
         def create(self, **kwargs):
+            assert kwargs["model"] == "grok-4.7"
             assert kwargs["messages"][-1] == {"role": "user", "content": "Hello"}
             return SimpleNamespace(
                 choices=[SimpleNamespace(message=SimpleNamespace(content="Hi there!"))]
             )
 
     class FakeOpenAI:
-        def __init__(self, api_key):
-            assert api_key == "test-key"
+        def __init__(self, api_key, base_url):
+            assert api_key == "test-xai-key"
+            assert base_url == "https://api.x.ai/v1"
             self.chat = SimpleNamespace(completions=FakeCompletions())
 
-    monkeypatch.setattr(assistant.settings, "openai_api_key", "test-key")
+    monkeypatch.setattr(assistant.settings, "xai_api_key", "test-xai-key")
+    monkeypatch.setattr(assistant.settings, "xai_model", "grok-4.7")
+    monkeypatch.setattr(assistant.settings, "xai_base_url", "https://api.x.ai/v1")
     monkeypatch.setattr(assistant, "OpenAI", FakeOpenAI)
 
     response = client.post("/api/assistant/chat", json={"message": "Hello"})
 
     assert response.status_code == 200
     assert response.json() == {"answer": "Hi there!"}
+
+
+def test_chat_falls_back_to_openai(client, monkeypatch):
+    class FakeCompletions:
+        def create(self, **kwargs):
+            assert kwargs["model"] == "gpt-test"
+            return SimpleNamespace(
+                choices=[SimpleNamespace(message=SimpleNamespace(content="OpenAI answer"))]
+            )
+
+    class FakeOpenAI:
+        def __init__(self, api_key, **kwargs):
+            assert api_key == "test-openai-key"
+            assert kwargs == {}
+            self.chat = SimpleNamespace(completions=FakeCompletions())
+
+    monkeypatch.setattr(assistant.settings, "xai_api_key", "")
+    monkeypatch.setattr(assistant.settings, "openai_api_key", "test-openai-key")
+    monkeypatch.setattr(assistant.settings, "openai_model", "gpt-test")
+    monkeypatch.setattr(assistant, "OpenAI", FakeOpenAI)
+
+    response = client.post("/api/assistant/chat", json={"message": "Hello"})
+
+    assert response.status_code == 200
+    assert response.json() == {"answer": "OpenAI answer"}
 
 
 def test_chat_includes_selected_dataset_profile(client, monkeypatch, session_factory, tmp_path):
@@ -63,10 +93,11 @@ def test_chat_includes_selected_dataset_profile(client, monkeypatch, session_fac
             )
 
     class FakeOpenAI:
-        def __init__(self, api_key):
+        def __init__(self, api_key, base_url):
             self.chat = SimpleNamespace(completions=FakeCompletions())
 
-    monkeypatch.setattr(assistant.settings, "openai_api_key", "test-key")
+    monkeypatch.setattr(assistant.settings, "xai_api_key", "test-xai-key")
+    monkeypatch.setattr(assistant.settings, "xai_base_url", "https://api.x.ai/v1")
     monkeypatch.setattr(assistant, "OpenAI", FakeOpenAI)
 
     response = client.post(

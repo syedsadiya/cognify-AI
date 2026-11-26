@@ -9,6 +9,9 @@ class Settings(BaseSettings):
 
     app_name: str = "CremaBench"
     tagline: str = "Intelligent Data. Smarter Performance."
+    xai_api_key: str = ""
+    xai_model: str = "grok-4.7"
+    xai_base_url: str = "https://api.x.ai/v1"
     openai_api_key: str = ""
     openai_model: str = "gpt-4o-mini"
     database_url: str = "sqlite:///./storage/cremabench.db"
